@@ -49,6 +49,24 @@ class GroceryListTableViewController: UITableViewController {
     navigationItem.leftBarButtonItem = userCountBarButtonItem
     
     user = User(uid: "FakeId", email: "hungry@person.food")
+    
+    // 1 Attach a listener to receive updates whenever the grocery-items endpoint is modified.
+    ref.observe(.value, with: { snapshot in
+      // 2 Store the latest version of the data in a local variable inside the listener’s closure.
+      var newItems: [GroceryItem] = []
+      
+      // 3 The listener’s closure returns a snapshot of the latest set of data. The snapshot contains the entire list of grocery items, not just the updates. Using children, you loop through the grocery items.
+      for item in snapshot.children {
+        
+        // 4 The GroceryItem struct has an initializer that populates its properties using a DataSnapshot. A snapshot’s value is of type AnyObject, and can be a dictionary, array, number, or string. After creating an instance of GroceryItem, it’s added it to the array that contains the latest version of the data.
+        let groceryItem = GroceryItem(snapshot: item as! DataSnapshot)
+        newItems.append(groceryItem)
+      }
+      
+      // 5 Reassign items to the latest version of the data, then reload the table view so it displays the latest version.
+      self.items = newItems
+      self.tableView.reloadData()
+    })
   }
   
   // MARK: UITableView Delegate methods
