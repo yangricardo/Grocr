@@ -43,7 +43,19 @@ class LoginViewController: UIViewController {
     
     let saveAction = UIAlertAction(title: "Save",
                                    style: .default) { action in
-                                    
+      // 1 Get the email and password as supplied by the user from the alert controller.
+      let emailField = alert.textFields![0]
+      let passwordField = alert.textFields![1]
+      
+      // 2 Call createUser(withEmail:password:) on the default Firebase auth object passing the email and password.
+      Auth.auth().createUser(withEmail: emailField.text!,
+       password: passwordField.text!) { user, error in
+        if error == nil {
+          // 3 If there are no errors, the user account has been created. However, you still need to authenticate this new user, so call signIn(withEmail:password:), again passing in the supplied email and password.
+          Auth.auth().signIn(withEmail: self.textFieldLoginEmail.text!,
+                                 password: self.textFieldLoginPassword.text!)
+        }
+      }
     }
     
     let cancelAction = UIAlertAction(title: "Cancel",
