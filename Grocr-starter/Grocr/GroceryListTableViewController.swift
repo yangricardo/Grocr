@@ -51,7 +51,7 @@ class GroceryListTableViewController: UITableViewController {
     user = User(uid: "FakeId", email: "hungry@person.food")
     
     // 1 Attach a listener to receive updates whenever the grocery-items endpoint is modified.
-    ref.observe(.value, with: { snapshot in
+    ref.queryOrdered(byChild: "completed").observe(.value, with: { snapshot in
       // 2 Store the latest version of the data in a local variable inside the listener’s closure.
       var newItems: [GroceryItem] = []
       
