@@ -48,7 +48,7 @@ class GroceryListTableViewController: UITableViewController {
     userCountBarButtonItem.tintColor = UIColor.white
     navigationItem.leftBarButtonItem = userCountBarButtonItem
     
-    user = User(uid: "FakeId", email: "hungry@person.food")
+    //user = User(uid: "FakeId", email: "hungry@person.food")
     
     // 1 Attach a listener to receive updates whenever the grocery-items endpoint is modified.
     ref.queryOrdered(byChild: "completed").observe(.value, with: { snapshot in
@@ -67,6 +67,14 @@ class GroceryListTableViewController: UITableViewController {
       self.items = newItems
       self.tableView.reloadData()
     })
+    
+    // Here you attach an authentication observer to the Firebase auth object, that in turn assigns the user property when a user successfully signs in.
+
+    Auth.auth().addStateDidChangeListener { auth, user in
+      guard let user = user else { return }
+      self.user = User(uid: user.uid, email: user.email!)
+    }
+
   }
   
   // MARK: UITableView Delegate methods

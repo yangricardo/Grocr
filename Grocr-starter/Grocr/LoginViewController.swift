@@ -32,8 +32,25 @@ class LoginViewController: UIViewController {
   @IBOutlet weak var textFieldLoginPassword: UITextField!
   
   // MARK: Actions
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    // 1 Create an authentication observer using addStateDidChangeListener(_:). The block is passed two parameters: auth and user.
+    Auth.auth().addStateDidChangeListener() { auth, user in
+      
+      // 2 Test the value of user. Upon successful user authentication, user is populated with the user’s information. If authentication fails, the variable is nil.
+      if user != nil {
+        
+        // 3 On successful authentication, perform the segue. Pass nil as the sender. This may seem strange, but you’ll set this up in GroceryListTableViewController.swift.
+        self.performSegue(withIdentifier: self.loginToList, sender: nil)
+      }
+    }
+  }
+  
   @IBAction func loginDidTouch(_ sender: AnyObject) {
-    performSegue(withIdentifier: loginToList, sender: nil)
+    Auth.auth().signIn(withEmail: textFieldLoginEmail.text!,
+                           password: textFieldLoginPassword.text!)
   }
   
   @IBAction func signUpDidTouch(_ sender: AnyObject) {
