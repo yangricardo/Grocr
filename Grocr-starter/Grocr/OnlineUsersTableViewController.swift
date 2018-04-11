@@ -21,11 +21,13 @@
  */
 
 import UIKit
+import Firebase
 
 class OnlineUsersTableViewController: UITableViewController {
   
   // MARK: Constants
   let userCell = "UserCell"
+  let usersRef = Database.database().reference(withPath: "online")
   
   // MARK: Properties
   var currentUsers: [String] = []
@@ -33,7 +35,33 @@ class OnlineUsersTableViewController: UITableViewController {
   // MARK: UIViewController Lifecycle
   override func viewDidLoad() {
     super.viewDidLoad()
-    currentUsers.append("hungry@person.food")
+    
+    // 1 Create an observer that listens for children added to the location managed by usersRef. This is different than a value listener because only the added child is passed to the closure.
+    usersRef.observe(.childAdded, with: { snap in
+      // 2 Take the value from the snapshot, and then append it to the local array.
+
+      guard let email = snap.value as? String else { return }
+      self.currentUsers.append(email)
+      // 3 The current row is always the count of the local array minus one because the indexes managed by the table view are zero-based.
+      let row = self.currentUsers.count - 1
+      
+      // 4 Create an instance NSIndexPath using the calculated row index.
+      let indexPath = IndexPath(row: row, section: 0)
+      
+      // 5 Insert the row using an animation that causes the cell to be inserted from the top.
+      self.tableView.insertRows(at: [indexPath], with: .top)
+    })
+    
+    usersRef.observe(.childRemoved, with: { snap in
+      guard let emailToFind = snap.value as? String else { return }
+      for (index, email) in self.currentUsers.enumerated() {
+        if email == emailToFind {
+          let indexPath = IndexPath(row: index, section: 0)
+          self.currentUsers.remove(at: index)
+          self.tableView.deleteRows(at: [indexPath], with: .fade)
+        }
+      }
+    })
   }
   
   // MARK: UITableView Delegate methods

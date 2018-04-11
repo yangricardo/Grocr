@@ -28,6 +28,7 @@ class GroceryListTableViewController: UITableViewController {
   // MARK: Constants
   let listToUsers = "ListToUsers"
   let ref = Database.database().reference(withPath: "grocery-items")
+  let usersRef = Database.database().reference(withPath: "online")
   
   // MARK: Properties 
   var items: [GroceryItem] = []
@@ -73,8 +74,25 @@ class GroceryListTableViewController: UITableViewController {
     Auth.auth().addStateDidChangeListener { auth, user in
       guard let user = user else { return }
       self.user = User(uid: user.uid, email: user.email!)
+      
+      // 1 Create a child reference using a user’s uid, which is generated when Firebase creates an account.
+      let currentUserRef = self.usersRef.child(self.user.uid)
+      
+      // 2 Use this reference to save the current user’s email.
+      currentUserRef.setValue(self.user.email)
+      
+      // 3 Call onDisconnectRemoveValue() on currentUserRef. This removes the value at the reference’s location after the connection to Firebase closes, for instance when a user quits your app. This is perfect for monitoring users who have gone offline.
+      currentUserRef.onDisconnectRemoveValue()
+      
     }
-
+   
+    usersRef.observe(.value, with: { snapshot in
+      if snapshot.exists() {
+        self.userCountBarButtonItem?.title = snapshot.childrenCount.description
+      } else {
+        self.userCountBarButtonItem?.title = "0"
+      }
+    })
   }
   
   // MARK: UITableView Delegate methods
